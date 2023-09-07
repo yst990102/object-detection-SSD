@@ -6,6 +6,7 @@ import uuid
 import atexit
 import shutil
 import os
+import skvideo.io
 
 # 定义视频处理函数
 def process_video(input_video_path):
@@ -67,11 +68,12 @@ def process_video(input_video_path):
         if writer is None:
             random_filename = "./tmp/" + str(uuid.uuid4()) + ".mp4"
             fourcc = cv2.VideoWriter_fourcc(*'avc1')  # 可以根据需要选择适当的编解码器
-            writer = cv2.VideoWriter(random_filename, fourcc, 30, (origin_frame.shape[1], origin_frame.shape[0]), True)
-
+            # writer = cv2.VideoWriter(random_filename, fourcc, 30, (origin_frame.shape[1], origin_frame.shape[0]), True)
+            writer = skvideo.io.FFmpegWriter(random_filename, outputdict={'-vcodec': 'libx264', '-pix_fmt': 'yuv420p'})
         # 将帧写入输出视频
-        writer.write(origin_frame)
-        
+        # writer.write(origin_frame)
+        writer.writeFrame(cv2.cvtColor(origin_frame, cv2.COLOR_BGR2RGB))
+
         display_frame = cv2.cvtColor(origin_frame, cv2.COLOR_BGR2RGB)  # 将图像从BGR转换为RGB
         if frame_display_counter:
             frame_display_counter -= 1
@@ -80,9 +82,36 @@ def process_video(input_video_path):
             frame_display_counter = frame_display_interval
 
     vs.release()
-    writer.release()
+    # 在循环结束后释放视频编写器
+    # if writer is not None:
+    #     writer.release()
+    writer.close()
+    
+    # 将相对路径转换为绝对路径
+    absolute_path = os.path.abspath(random_filename)
+    print(absolute_path)
+    
+    # 指定根目录路径
+    root_directory = "./tmp"
+    # 调用函数打印根目录的文件树
+    print_directory_tree(root_directory)
 
-    yield display_frame, random_filename
+    yield display_frame, absolute_path
+
+
+def print_directory_tree(directory):
+    for root, dirs, files in os.walk(directory):
+        # 打印当前目录路径
+        print(f"Directory: {root}")
+        
+        # 打印当前目录下的所有文件
+        for file in files:
+            print(f"  File: {os.path.join(root, file)}")
+        
+        # 打印当前目录下的所有子目录
+        for dir in dirs:
+            print(f"  Subdirectory: {os.path.join(root, dir)}")
+
 
 # 定义一个清理函数，用于删除tmp文件夹中的.mp4输出视频
 def cleanup_tmp_folder():

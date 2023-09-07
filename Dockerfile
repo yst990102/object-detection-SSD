@@ -3,7 +3,7 @@ FROM python:3.8
 
 # 安装OpenGL库
 RUN apt-get update && apt-get install -y libgl1-mesa-glx
-RUN apt-get install -y python3-opencv
+RUN apt-get install -y python3-opencv libopencv-dev x264 ffmpeg
 
 RUN useradd -m -u 1000 user
 USER user
