@@ -81,6 +81,7 @@ def process_video(input_video_path):
 
     vs.release()
     writer.release()
+
     yield display_frame, random_filename
 
 # 定义一个清理函数，用于删除tmp文件夹中的.mp4输出视频
@@ -108,7 +109,7 @@ def main():
 
         process_video_btn.click(process_video, input_video, [processed_frames, output_video])
 
-    demo.queue().launch(server_name="0.0.0.0",server_port=7860)
+    demo.queue().launch(share=False,debug=True,server_name="0.0.0.0",server_port=7860)
 
 if __name__ == "__main__":
     # 注册清理函数，确保在程序退出时执行
