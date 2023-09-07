@@ -37,7 +37,9 @@ def process_video(input_video_path):
         ret, frame = vs.read()
         if not ret:
             break
-        frame = imutils.resize(frame, width=400)
+        origin_frame = frame.copy()
+        origin_h, origin_w = origin_frame.shape[:2]
+        frame = imutils.resize(frame, width=400, height=400)
         (h, w) = frame.shape[:2]
 
         blob = cv2.dnn.blobFromImage(frame, 0.007843, (300, 300), 127.5)
@@ -50,26 +52,27 @@ def process_video(input_video_path):
                 idx = int(detections[0, 0, i, 1])
                 box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
                 (startX, startY, endX, endY) = box.astype("int")
+                originStartX = int(startX*origin_w/w)
+                originStartY = int(startY*origin_h/h)
+                originEndX = int(endX*origin_w/w)
+                originEndY = int(endY*origin_h/h)
 
                 label = "{}: {:.2f}%".format(CLASSES[idx], confidence * 100)
-                cv2.rectangle(frame, (startX, startY), (endX, endY), COLORS[idx], 2)
+                cv2.rectangle(origin_frame, (originStartX, originStartY), (originEndX, originEndY), COLORS[idx], 2)
 
-                y = startY - 15 if startY - 15 > 15 else startY + 15
-                cv2.putText(frame, label, (startX, y), cv2.FONT_HERSHEY_DUPLEX, 0.5, COLORS[idx], 1)
-
-        # 将帧调整回与输入视频相同的分辨率
-        frame = imutils.resize(frame, width=w, height=h)
+                y = originStartY - 15 if originStartY - 15 > 15 else originStartY + 15
+                cv2.putText(origin_frame, label, (originStartX, y), cv2.FONT_HERSHEY_DUPLEX, 0.5, COLORS[idx], 1)
 
         # 如果没有创建视频编写器，请创建它
         if writer is None:
             random_filename = "./tmp/" + str(uuid.uuid4()) + ".mp4"
             fourcc = cv2.VideoWriter_fourcc(*'avc1')  # 可以根据需要选择适当的编解码器
-            writer = cv2.VideoWriter(random_filename, fourcc, 30, (frame.shape[1], frame.shape[0]), True)
+            writer = cv2.VideoWriter(random_filename, fourcc, 30, (origin_frame.shape[1], origin_frame.shape[0]), True)
 
         # 将帧写入输出视频
-        writer.write(frame)
-
-        display_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)  # 将图像从BGR转换为RGB
+        writer.write(origin_frame)
+        
+        display_frame = cv2.cvtColor(origin_frame, cv2.COLOR_BGR2RGB)  # 将图像从BGR转换为RGB
         if frame_display_counter:
             frame_display_counter -= 1
         else:
@@ -101,7 +104,7 @@ def main():
 
         process_video_btn.click(process_video, input_video, [processed_frames, output_video])
 
-    demo.queue().launch(share=True,debug=True)
+    demo.queue().launch(server_name="0.0.0.0",server_port=7860)
 
 if __name__ == "__main__":
     # 注册清理函数，确保在程序退出时执行
