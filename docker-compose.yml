@@ -1,0 +1,8 @@
+version: '3'
+services:
+  object-detection-ssd:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "7860:7860"

@@ -1,0 +1,5 @@
+gradio
+numpy
+imutils
+opencv-python
+uuid
