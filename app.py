@@ -67,7 +67,7 @@ def process_video(input_video_path):
         if writer is None:
             random_filename = "./tmp/" + str(uuid.uuid4()) + ".mp4"
             fourcc = cv2.VideoWriter_fourcc(*'avc1')  # 可以根据需要选择适当的编解码器
-            writer = cv2.VideoWriter(random_filename, fourcc, 30, (frame.shape[1], frame.shape[0]), True)
+            writer = cv2.VideoWriter(random_filename, fourcc, 30, (origin_frame.shape[1], origin_frame.shape[0]), True)
 
         # 将帧写入输出视频
         writer.write(origin_frame)

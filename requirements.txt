@@ -1,5 +1,4 @@
-gradio
-numpy
-imutils
-opencv-python
-uuid
+gradio==3.40.1
+numpy==1.24.3
+imutils==0.5.4
+opencv-python==4.8.0.74

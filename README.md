@@ -1,2 +1,10 @@
-# object-detection-SSD
- 一个基于MobileNetSSD模型的物体检测器
+---
+title: Object Detection SSD
+emoji: 👀
+colorFrom: purple
+colorTo: blue
+sdk: docker
+pinned: false
+---
+
+Check out the configuration reference at https://huggingface.co/docs/hub/spaces-config-reference
