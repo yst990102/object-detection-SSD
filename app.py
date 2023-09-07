@@ -52,7 +52,10 @@ def process_video(input_video_path):
                 idx = int(detections[0, 0, i, 1])
                 box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
                 (startX, startY, endX, endY) = box.astype("int")
-                originStartX, originStartY, originEndX, originEndY = map(lambda x, o: int(x*o/w), (startX, startY, endX, endY), (origin_w, origin_h, origin_w, origin_h))
+                originStartX = int(startX*origin_w/w)
+                originStartY = int(startY*origin_h/h)
+                originEndX = int(endX*origin_w/w)
+                originEndY = int(endY*origin_h/h)
 
                 label = "{}: {:.2f}%".format(CLASSES[idx], confidence * 100)
                 cv2.rectangle(origin_frame, (originStartX, originStartY), (originEndX, originEndY), COLORS[idx], 2)
@@ -63,7 +66,7 @@ def process_video(input_video_path):
         # 如果没有创建视频编写器，请创建它
         if writer is None:
             random_filename = "./tmp/" + str(uuid.uuid4()) + ".mp4"
-            fourcc = cv2.VideoWriter_fourcc(*'DIVX')  # 可以根据需要选择适当的编解码器
+            fourcc = cv2.VideoWriter_fourcc(*'avc1')  # 可以根据需要选择适当的编解码器
             writer = cv2.VideoWriter(random_filename, fourcc, 30, (frame.shape[1], frame.shape[0]), True)
 
         # 将帧写入输出视频
@@ -80,12 +83,16 @@ def process_video(input_video_path):
     writer.release()
     yield display_frame, random_filename
 
-# 定义一个清理函数，用于删除tmp文件夹及其内容
+# 定义一个清理函数，用于删除tmp文件夹中的.mp4输出视频
 def cleanup_tmp_folder():
+    tmp_directory = "./tmp"
     try:
-        shutil.rmtree("./tmp")
+        for filename in os.listdir(tmp_directory):
+            if filename.endswith(".mp4"):
+                file_path = os.path.join(tmp_directory, filename)
+                os.remove(file_path)
     except Exception as e:
-        print(f"Error cleaning up tmp folder: {str(e)}")
+        print(f"Error cleaning up .mp4 files in tmp folder: {str(e)}")
 
 def main():
     # 定义Gradio界面
