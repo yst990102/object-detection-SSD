@@ -16,4 +16,4 @@ RUN apt-get update && apt-get install -y libgl1-mesa-glx
 EXPOSE 7860
 
 # 运行Python应用程序
-CMD ["python", "main.py"]
+CMD ["python", "app.py"]
